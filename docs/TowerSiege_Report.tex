@@ -1,0 +1,98 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+\title{\textbf{Tower Siege}\\[0.4em]\large An Augmented-Reality Tower Defense Game}
+\author{Obioma-Uzoho Uchenna George. 283089}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Tower Siege is a mobile augmented-reality (AR) tower-defense game built in Unity~6 with AR Foundation and deployed to Android. The player scans a real-world surface, anchors a fantasy battlefield in AR, builds towers on a grid, and defends against successive waves of monsters. This report summarises the design, technical implementation, and development challenges, and includes a complete README (Section~\ref{sec:readme}) with setup and usage instructions. The full source code is available at \url{https://github.com/CreekBird/Final-Project-VR-}.
+\end{abstract}
+
+\section{Overview}
+Tower Siege turns any flat surface in the player's environment into a battlefield. Using the device camera and AR plane detection, the game overlays a small fantasy diorama onto a real table or floor; the player then builds defensive towers and repels waves of enemies that march along a fixed path toward a base. The project targets Android devices with ARCore support and was developed in Unity version 6000.3.11f1 (Unity~6.3~LTS) using the Universal Render Pipeline (URP), AR Foundation, and the XR Interaction Toolkit.
+
+\section{Gameplay}
+The core loop is: \textbf{(1)~Placement} --- point the camera at a well-lit, textured surface; detected planes are highlighted, and tapping a plane (or a fallback button that appears after seven seconds) anchors the battlefield in world space. \textbf{(2)~Build} --- spend gold to place towers (Archer, Wizard, Cannon) on grid cells, each with different range, fire rate, and damage. \textbf{(3)~Wave} --- pressing \emph{Send Wave} spawns enemies that follow a waypoint path; towers automatically target and fire, destroyed enemies grant gold, and enemies that reach the base cost a life. \textbf{(4)~Resolution} --- clearing all waves wins the game, while losing all lives ends it.
+
+\section{Technical Implementation}
+AR functionality is provided by AR Foundation. An \texttt{XR Origin} rig hosts the AR camera, an \texttt{ARPlaneManager} that visualises detected planes, and an \texttt{ARRaycastManager} that converts screen taps into world-space poses; placed content is parented under an \texttt{ARAnchor} so it stays locked to the physical world. The game logic is split into focused components: \textbf{GameManager} (a finite-state machine over Placement/Build/Wave/GameOver/Victory that also owns the gold and lives economy), \textbf{BattlefieldPlacer} (plane scanning, reticle, tap-to-place, and fallback button), \textbf{TowerPlacer} (shop selection and grid placement), \textbf{WaveManager} (spawning and wave progression), \textbf{Tower}, \textbf{EnemyMovement}, \textbf{EnemyHealth} (per-entity behaviour), and \textbf{UIManager} (HUD, shop, and overlays).
+
+\section{Development Notes}
+Several issues were diagnosed and resolved during development: the \texttt{XR Origin}'s camera reference was unassigned and the camera lacked a Tracked Pose Driver (so the AR view never tracked the device); the battlefield meshes had no materials and rendered magenta under URP; the HUD container used a plain \texttt{Transform} instead of a \texttt{RectTransform}, collapsing the interface to the centre of the screen; and the ``Send Wave'' button label was not wired to update between waves. Each was fixed, and the battlefield was scaled up (1.8$\times$) for better screen coverage. The fantasy art was integrated through one-shot Unity editor scripts that swap meshes, build URP materials, and restyle the UI.
+
+\section{README}
+\label{sec:readme}
+
+\subsection*{Description}
+Tower Siege is a mobile augmented-reality tower-defense game built in Unity~6 with AR Foundation. Scan a real-world surface, anchor a fantasy battlefield in AR, build towers on a grid, and defend against waves of monsters.
+
+\subsection*{Features}
+\begin{itemize}[nosep]
+  \item AR plane detection and tap-to-place battlefield, with a fallback ``Place battlefield here'' button after seven seconds.
+  \item Three tower types --- Archer, Wizard, and Cannon --- each with its own range, fire rate, and damage.
+  \item Wave-based combat against animated Orc enemies that follow a path to your base.
+  \item A gold economy (earn by defeating enemies, spend on towers) and a lives system.
+  \item Low-poly fantasy 3D art, a ``blue stone and silver'' UI theme, and a dusk-sky main menu.
+\end{itemize}
+
+\subsection*{Requirements}
+\begin{itemize}[nosep]
+  \item Unity 6000.3.11f1 (Unity~6.3~LTS) or a compatible Unity~6 release.
+  \item AR Foundation with ARCore (Android) or ARKit (iOS).
+  \item An ARCore-capable Android device for deployment.
+\end{itemize}
+
+\subsection*{Build and Run}
+\begin{enumerate}[nosep]
+  \item Clone the repository: \texttt{git clone https://github.com/CreekBird/Final-Project-VR-.git}
+  \item Open the project in Unity Hub using Unity 6000.3.11f1.
+  \item Switch the platform to Android via \emph{File $\rightarrow$ Build Profiles $\rightarrow$ Android}.
+  \item Connect an ARCore-capable device and choose \emph{Build And Run}.
+\end{enumerate}
+
+\subsection*{How to Play}
+\begin{enumerate}[nosep]
+  \item From the main menu, tap \textbf{PLAY}.
+  \item Point the camera at a well-lit, textured flat surface until a plane is highlighted.
+  \item Tap the plane (or wait seven seconds and tap ``Place battlefield here'') to spawn the board.
+  \item Select a tower from the shop, then tap a grid cell to build it.
+  \item Tap \textbf{Send Wave} to begin each wave; clear all waves to win.
+\end{enumerate}
+
+\subsection*{Project Structure}
+\begin{itemize}[nosep]
+  \item \texttt{Assets/Scripts/} --- core game logic (GameManager, BattlefieldPlacer, TowerPlacer, WaveManager, UIManager, and others).
+  \item \texttt{Assets/Art/} --- imported fantasy models, textures, skybox, and UI sprites.
+  \item \texttt{Assets/Prefabs/} --- towers, enemies, and the battlefield prefab.
+  \item \texttt{Assets/Scenes/} --- the \texttt{MainMenu} and \texttt{Game} scenes.
+  \item \texttt{docs/} --- this report (LaTeX source and PDF).
+\end{itemize}
+
+\subsection*{Asset Credits (all CC0 / free-to-use)}
+\begin{itemize}[nosep]
+  \item Enemies: Quaternius --- \emph{Ultimate Monsters} (CC0).
+  \item Towers: CraftPix --- \emph{Free Defence Tower 3D Low Poly Models}.
+  \item User interface: Kenney --- \emph{UI Pack RPG Expansion} and \emph{Game Icons} (CC0).
+  \item Skybox: Poly Haven HDRI (CC0).
+\end{itemize}
+
+\subsection*{Repository}
+\url{https://github.com/CreekBird/Final-Project-VR-}
+
+\section{Conclusion}
+Tower Siege demonstrates a complete AR game loop on commodity Android hardware: surface detection, world-anchored content, real-time strategy interaction, and a themed front end. Possible extensions include additional enemy variety (the monster pack contains fifty models, enabling boss waves), tower upgrades, multiple battlefield layouts, and persistent progression.
+
+\end{document}
